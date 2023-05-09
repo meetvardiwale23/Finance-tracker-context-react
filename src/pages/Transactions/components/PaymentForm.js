@@ -1,23 +1,96 @@
 import { useForm } from "react-hook-form";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   monthYearOptions,
   allAccountsOptions,
   transactionTypeOptions,
 } from "../../../utils/ConstantValues";
-// import { FormFields } from "../../../components/Form Fields/FormFields";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+const schema = yup.object().shape({
+  date: yup.string().required("Transaction Date is required"),
+  monthYear: yup.string().required("Month Year is required"),
+  transactionType: yup.string().required("Transaction type is required"),
+  fromAccount: yup.string().required("From Account is required"),
+  toAccount: yup
+    .string()
+    .notOneOf(
+      [yup.ref("fromAccount")],
+      "From Account should not match with to account"
+    )
+    .required("To Account is required"),
+  amount: yup
+    .number()
+    .min(5, "The amount should be alteast greater then 5")
+    .required("Amount is required"),
+  notes: yup
+    .string()
+    .max(10, "The length of your note must be less then 10")
+    .required("Notes is required"),
+});
 
 export const PaymentForm = () => {
-  const { register, handleSubmit } = useForm();
-  const handleRegistration = (data) => console.log("data", data);
+  const [fomrValues, setFormValues] = useState([]);
+
+  //set id
+  useEffect(() => {
+    const newId = new Date().getTime();
+
+    setFormValues({ ...fomrValues, id: newId });
+  }, []);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
+
+  //handle base 64 image
+  const convertBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+
+  const handleChange = async (e) => {
+    const getFile = e.target.files[0];
+    const base64 = await convertBase64(getFile);
+
+    setFormValues({ ...fomrValues, receipt: base64 });
+  };
+
+  //handle registration
+  const handleRegistration = (data) => {
+    setFormValues({ ...fomrValues, data });
+    console.log("data", data);
+  };
 
   console.log("register hooks", register);
+  console.log("form vaues", fomrValues);
 
   return (
     <div
       classNameName="Paymentform"
-      style={{ width: "500px", justifyContent: "center", margin: "auto" }}
+      style={{
+        width: "500px",
+        justifyContent: "center",
+        margin: "auto",
+        border: "1px",
+        boxShadow:
+          "rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset",
+      }}
     >
+      <h1>Make Payment</h1>
       <form onSubmit={handleSubmit(handleRegistration)}>
         <div className="mb-4">
           <label for="exampleInputEmail1" className="form-label">
@@ -31,13 +104,19 @@ export const PaymentForm = () => {
             aria-describedby="emailHelp"
             {...register("date")}
           />
+          <p style={{ color: "red" }}>{errors.date?.message}</p>
         </div>
+
         <div className="mb-4">
           <label for="exampleInputEmail1" className="form-label">
             Month Year
           </label>
-          <select name="monthYear" {...register("monthYear")}>
-            <option selected disabled hidden>
+          <select
+            name="monthYear"
+            {...register("monthYear")}
+            className="form-control"
+          >
+            <option value="" selected disabled hidden>
               Select Month Year
             </option>
             {monthYearOptions.map((items, index) => (
@@ -46,14 +125,19 @@ export const PaymentForm = () => {
               </option>
             ))}
           </select>
+          <p style={{ color: "red" }}>{errors.monthYear?.message}</p>
         </div>
 
         <div className="mb-4">
           <label for="exampleInputEmail1" className="form-label">
             Transaction Type
           </label>
-          <select name="transactionType" {...register("transactionType")}>
-            <option selected disabled hidden>
+          <select
+            name="transactionType"
+            {...register("transactionType")}
+            className="form-control"
+          >
+            <option value="" selected disabled hidden>
               Select Transaction Type
             </option>
             {transactionTypeOptions.map((items, index) => (
@@ -62,14 +146,19 @@ export const PaymentForm = () => {
               </option>
             ))}
           </select>
+          <p style={{ color: "red" }}>{errors.transactionType?.message}</p>
         </div>
 
         <div className="mb-4">
           <label for="exampleInputEmail1" className="form-label">
             From Account
           </label>
-          <select name="fromAccount" {...register("fromAccount")}>
-            <option selected disabled hidden>
+          <select
+            name="fromAccount"
+            {...register("fromAccount")}
+            className="form-control"
+          >
+            <option value="" selected disabled hidden>
               Select From Account
             </option>
             {allAccountsOptions.map((items, index) => (
@@ -78,14 +167,19 @@ export const PaymentForm = () => {
               </option>
             ))}
           </select>
+          <p style={{ color: "red" }}>{errors.fromAccount?.message}</p>
         </div>
 
         <div className="mb-4">
           <label for="exampleInputEmail1" className="form-label">
             To Account
           </label>
-          <select name="fromAccount" {...register("fromAccount")}>
-            <option selected disabled hidden>
+          <select
+            name="toAccount"
+            {...register("toAccount")}
+            className="form-control"
+          >
+            <option value="" selected disabled hidden>
               Select To Account
             </option>
             {allAccountsOptions.map((items, index) => (
@@ -94,18 +188,53 @@ export const PaymentForm = () => {
               </option>
             ))}
           </select>
+          <p style={{ color: "red" }}>{errors.toAccount?.message}</p>
         </div>
 
-        <div className="mb-3 form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            id="exampleCheck1"
-          />
-          <label className="form-check-label" for="exampleCheck1">
-            Check me out
+        <div className="mb-4">
+          <label for="exampleInputEmail1" className="form-label">
+            Amount
           </label>
+          <input
+            type="number"
+            name="amount"
+            className="form-control"
+            id="amount"
+            aria-describedby="emailHelp"
+            {...register("amount")}
+          />
+          <p style={{ color: "red" }}>{errors.amount?.message}</p>
         </div>
+
+        <div className="mb-4">
+          <label for="exampleInputEmail1" className="form-label">
+            Recepit
+          </label>
+          <input
+            type="file"
+            name="recepit"
+            className="form-control"
+            id="file"
+            onChange={(e) => handleChange(e)}
+            aria-describedby="emailHelp"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label for="exampleInputEmail1" className="form-label">
+            Notes
+          </label>
+          <input
+            type="text"
+            name="notes"
+            className="form-control"
+            id="notes"
+            aria-describedby="emailHelp"
+            {...register("notes")}
+          />
+          <p style={{ color: "red" }}>{errors.notes?.message}</p>
+        </div>
+
         <button className="btn btn-primary">Submit</button>
       </form>
     </div>
