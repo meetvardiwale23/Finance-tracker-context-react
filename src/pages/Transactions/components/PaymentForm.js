@@ -34,7 +34,7 @@ const schema = yup.object().shape({
 export const PaymentForm = () => {
   //get state id for the edit
   const { state } = useLocation();
-  console.log("state", state);
+
 
   const navigate = useNavigate();
 
@@ -60,21 +60,22 @@ export const PaymentForm = () => {
   // setData([...getData, newData]);
 
   //set id
-  useEffect(() => {
-    const newId = new Date().getTime();
+  // useEffect(() => {
+  //   const newId = new Date().getTime();
 
-    setFormValues((formData) => ({
-      ...formData,
-      id: newId,
-    }));
+  //   setFormValues((formData) => ({
+  //     ...formData,
+  //     id: newId,
+  //   }));
 
-  }, []);
+  // }, []);
 
+  const values = fomrValues;
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: yupResolver(schema) });
+  } = useForm({ values, resolver: yupResolver(schema) });
 
   //handle base 64 image
   const convertBase64 = (file) => {
@@ -101,8 +102,23 @@ export const PaymentForm = () => {
 
   //handle registration sumit data
   const handleRegistration = (data) => {
-    
-    const newObject = { ...fomrValues, ...data };
+    let newObject = { ...fomrValues, ...data };
+
+    if (state) {
+      alert("we will edit this");
+      const getIndex = getData.findIndex((index) => {
+        return index.id === state;
+      });
+
+      getData[getIndex] = newObject;
+
+
+      setData([...getData]);
+      navigate("/allTransaction");
+      return;
+    }
+
+    newObject["id"] = new Date().getTime();
 
     setData([...getData, newObject]);
     navigate("/allTransaction");
@@ -110,14 +126,13 @@ export const PaymentForm = () => {
 
   // handle the edit the data
   const handleEdit = (id) => {
-    console.log("state  id inside the function", id);
+
 
     // find the array from the globa context data and paste into the form
     const editData = getData.find((data) => {
       return data.id === state;
     });
 
-    console.log("edit data", editData);
     setFormValues({ ...editData });
   };
 
@@ -149,7 +164,6 @@ export const PaymentForm = () => {
             className="form-control"
             id="exampleInputEmail1"
             aria-describedby="emailHelp"
-            value={fomrValues.transactionDate}
             {...register("date")}
           />
           <p style={{ color: "red" }}>{errors.date?.message}</p>
@@ -163,7 +177,7 @@ export const PaymentForm = () => {
             name="monthYear"
             {...register("monthYear")}
             className="form-control"
-            value={fomrValues.monthYear}
+            // value={fomrValues.monthYear}
           >
             <option value="" selected disabled hidden>
               Select Month Year
@@ -185,7 +199,7 @@ export const PaymentForm = () => {
             name="transactionType"
             {...register("transactionType")}
             className="form-control"
-            value={fomrValues.transactionType}
+            // value={fomrValues.transactionType}
           >
             <option value="" selected disabled hidden>
               Select Transaction Type
@@ -207,7 +221,7 @@ export const PaymentForm = () => {
             name="fromAccount"
             {...register("fromAccount")}
             className="form-control"
-            value={fomrValues.fromAccount}
+            // value={fomrValues.fromAccount}
           >
             <option value="" selected disabled hidden>
               Select From Account
@@ -229,7 +243,7 @@ export const PaymentForm = () => {
             name="toAccount"
             {...register("toAccount")}
             className="form-control"
-            value={fomrValues.toAccount}
+            // value={fomrValues.toAccount}
           >
             <option value="" selected disabled hidden>
               Select To Account
@@ -253,7 +267,7 @@ export const PaymentForm = () => {
             className="form-control"
             id="amount"
             aria-describedby="emailHelp"
-            value={fomrValues.amount}
+            // value={fomrValues.amount}
             {...register("amount")}
           />
           <p style={{ color: "red" }}>{errors.amount?.message}</p>
@@ -289,7 +303,7 @@ export const PaymentForm = () => {
             className="form-control"
             id="notes"
             aria-describedby="emailHelp"
-            value={fomrValues.notes}
+            // value={fomrValues.notes}
             {...register("notes")}
           />
           <p style={{ color: "red" }}>{errors.notes?.message}</p>

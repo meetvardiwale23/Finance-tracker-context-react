@@ -14,7 +14,6 @@ import { Link, useNavigate } from "react-router-dom";
 // eg arr.fil(0) output will be the [0,0,0]
 
 export const LogicTable = ({ data, search }) => {
-  
   //set the naivagte varaible
 
   const searchField = search.searchString;
@@ -182,6 +181,18 @@ export const LogicTable = ({ data, search }) => {
     handlerSearch();
   }, [searchField]);
 
+  // delete
+  const deleteID = (e) => {
+    //console.log("delete id", );
+    const delID = e.target.id;
+
+    const deleteIndex = data.find((deleteData) => {
+      return deleteData.id === Number(delID);
+    });
+
+    console.log("data",data,"Delete Index",deleteIndex,"del ID",typeof delID);
+  };
+
   return (
     <div>
       <table className="table">
@@ -216,6 +227,7 @@ export const LogicTable = ({ data, search }) => {
               notes
             </th>
             <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
           </tr>
         </thead>
 
@@ -228,7 +240,9 @@ export const LogicTable = ({ data, search }) => {
                   <td name="transactionDate">{keys.transactionType}</td>
                   <td name="transactionDate">{keys.fromAccount}</td>
                   <td name="transactionDate">{keys.toAccount}</td>
-                  <td name="transactionDate">{keys.amount}</td>
+                  <td name="transactionDate">
+                    {Number(keys.amount).toLocaleString("er-IN")}
+                  </td>
                   <td name="images">
                     <img
                       style={{ height: "80px", width: "80px" }}
@@ -242,6 +256,14 @@ export const LogicTable = ({ data, search }) => {
                       {" "}
                       <i class="fas fa-edit"></i>{" "}
                     </Link>{" "}
+                  </td>
+                  <td>
+                    <i
+                      class="fa fa-trash"
+                      aria-hidden="true"
+                      id={keys.id}
+                      onClick={deleteID}
+                    ></i>
                   </td>
                 </tr>
               ))
