@@ -14,9 +14,9 @@ import { Link, useNavigate } from "react-router-dom";
 // eg arr.fil(0) output will be the [0,0,0]
 
 export const LogicTable = ({ data, search }) => {
-  console.log("logic table data", data, "search data", search);
+  
   //set the naivagte varaible
-  const navigate = useNavigate();
+
   const searchField = search.searchString;
 
   //show the recordes per page
@@ -229,13 +229,13 @@ export const LogicTable = ({ data, search }) => {
                   <td name="transactionDate">{keys.fromAccount}</td>
                   <td name="transactionDate">{keys.toAccount}</td>
                   <td name="transactionDate">{keys.amount}</td>
-                  <td name="transactionDate">{keys.notes}</td>
                   <td name="images">
                     <img
                       style={{ height: "80px", width: "80px" }}
-                      src={keys.recepit}
+                      src={keys.receipt}
                     />
                   </td>
+                  <td name="transactionDate">{keys.notes}</td>
                   <td>
                     {" "}
                     <Link to={"/makePayment"} state={keys.id}>

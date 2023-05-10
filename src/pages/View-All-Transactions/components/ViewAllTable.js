@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { LogicTable } from "../LogicTable";
 import { useNavigate } from "react-router-dom";
 import { localStorage } from "../localstorage";
+import { GlobalData } from "../../../context/FormData";
 //import Nodata from "../../No Data Found/components/Nodata";
 
 // import all the arrays
@@ -10,9 +11,13 @@ import { localStorage } from "../localstorage";
 export const ViewAllTable = () => {
   const navigate = useNavigate();
   //first get the local storage data
+
+  // use data of context
+  const { getData, setData } = useContext(GlobalData);
+
   const storageData = localStorage;
 
-  const [maindata, setMainData] = useState(storageData);
+  const [maindata, setMainData] = useState(getData);
   const [orderBy, setOrderBy] = useState([]);
   const [groupByTitle, setGroupByTitle] = useState();
   const [searchData, setSearchData] = useState([

@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   monthYearOptions,
   allAccountsOptions,
@@ -7,7 +7,8 @@ import {
 } from "../../../utils/ConstantValues";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-
+import { GlobalData } from "../../../context/FormData";
+import { useLocation, useNavigate } from "react-router-dom";
 const schema = yup.object().shape({
   date: yup.string().required("Transaction Date is required"),
   monthYear: yup.string().required("Month Year is required"),
@@ -26,18 +27,47 @@ const schema = yup.object().shape({
     .required("Amount is required"),
   notes: yup
     .string()
-    .max(10, "The length of your note must be less then 10")
+    .max(240, "The length of your note must be less then 240")
     .required("Notes is required"),
 });
 
 export const PaymentForm = () => {
-  const [fomrValues, setFormValues] = useState([]);
+  //get state id for the edit
+  const { state } = useLocation();
+  console.log("state", state);
+
+  const navigate = useNavigate();
+
+  const [fomrValues, setFormValues] = useState({
+    id: "",
+    transactionDate: "",
+    monthYear: "",
+    transactionType: "",
+    fromAccount: "",
+    toAccount: "",
+    amount: "",
+    receipt: "",
+    notes: "",
+  });
+  const { getData, setData } = useContext(GlobalData);
+
+  // code to checkt the id
+  // const newData = [
+  //   { id: 1, name: "meet" },
+  //   { id: 2, name: "tushar" },
+  //   { id: 3, name: "naresh" },
+  // ];
+  // setData([...getData, newData]);
 
   //set id
   useEffect(() => {
     const newId = new Date().getTime();
 
-    setFormValues({ ...fomrValues, id: newId });
+    setFormValues((formData) => ({
+      ...formData,
+      id: newId,
+    }));
+
   }, []);
 
   const {
@@ -69,14 +99,31 @@ export const PaymentForm = () => {
     setFormValues({ ...fomrValues, receipt: base64 });
   };
 
-  //handle registration
+  //handle registration sumit data
   const handleRegistration = (data) => {
-    setFormValues({ ...fomrValues, data });
-    console.log("data", data);
+    
+    const newObject = { ...fomrValues, ...data };
+
+    setData([...getData, newObject]);
+    navigate("/allTransaction");
   };
 
-  console.log("register hooks", register);
-  console.log("form vaues", fomrValues);
+  // handle the edit the data
+  const handleEdit = (id) => {
+    console.log("state  id inside the function", id);
+
+    // find the array from the globa context data and paste into the form
+    const editData = getData.find((data) => {
+      return data.id === state;
+    });
+
+    console.log("edit data", editData);
+    setFormValues({ ...editData });
+  };
+
+  useEffect(() => {
+    handleEdit(state);
+  }, [state]);
 
   return (
     <div
@@ -102,6 +149,7 @@ export const PaymentForm = () => {
             className="form-control"
             id="exampleInputEmail1"
             aria-describedby="emailHelp"
+            value={fomrValues.transactionDate}
             {...register("date")}
           />
           <p style={{ color: "red" }}>{errors.date?.message}</p>
@@ -115,6 +163,7 @@ export const PaymentForm = () => {
             name="monthYear"
             {...register("monthYear")}
             className="form-control"
+            value={fomrValues.monthYear}
           >
             <option value="" selected disabled hidden>
               Select Month Year
@@ -136,6 +185,7 @@ export const PaymentForm = () => {
             name="transactionType"
             {...register("transactionType")}
             className="form-control"
+            value={fomrValues.transactionType}
           >
             <option value="" selected disabled hidden>
               Select Transaction Type
@@ -157,6 +207,7 @@ export const PaymentForm = () => {
             name="fromAccount"
             {...register("fromAccount")}
             className="form-control"
+            value={fomrValues.fromAccount}
           >
             <option value="" selected disabled hidden>
               Select From Account
@@ -178,6 +229,7 @@ export const PaymentForm = () => {
             name="toAccount"
             {...register("toAccount")}
             className="form-control"
+            value={fomrValues.toAccount}
           >
             <option value="" selected disabled hidden>
               Select To Account
@@ -201,6 +253,7 @@ export const PaymentForm = () => {
             className="form-control"
             id="amount"
             aria-describedby="emailHelp"
+            value={fomrValues.amount}
             {...register("amount")}
           />
           <p style={{ color: "red" }}>{errors.amount?.message}</p>
@@ -210,6 +263,7 @@ export const PaymentForm = () => {
           <label for="exampleInputEmail1" className="form-label">
             Recepit
           </label>
+
           <input
             type="file"
             name="recepit"
@@ -218,6 +272,11 @@ export const PaymentForm = () => {
             onChange={(e) => handleChange(e)}
             aria-describedby="emailHelp"
           />
+          <img
+            src={fomrValues.receipt}
+            alt="receipt"
+            style={{ height: "100px", width: "100px" }}
+          ></img>
         </div>
 
         <div className="mb-4">
@@ -230,6 +289,7 @@ export const PaymentForm = () => {
             className="form-control"
             id="notes"
             aria-describedby="emailHelp"
+            value={fomrValues.notes}
             {...register("notes")}
           />
           <p style={{ color: "red" }}>{errors.notes?.message}</p>
