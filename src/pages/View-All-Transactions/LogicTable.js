@@ -1,9 +1,8 @@
 /* eslint-disable no-restricted-globals */
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-//import Nodata from "../../No Data Found/components/Nodata";
-
+import { GlobalData } from "../../context/FormData";
 // // stpes for sorting
 // make empty state for sotring the data of props
 // make the another state for the sorting keep cloumn name ad order in that state
@@ -16,7 +15,11 @@ import { Link, useNavigate } from "react-router-dom";
 export const LogicTable = ({ data, search }) => {
   //set the naivagte varaible
 
+  console.log("data after group by", data);
   const searchField = search.searchString;
+
+  //use of the context data
+  const { getData, setData } = useContext(GlobalData);
 
   //show the recordes per page
   let recordPerPage = 2;
@@ -147,6 +150,7 @@ export const LogicTable = ({ data, search }) => {
 
     const searchData = globalData.filter((itemsFound) => {
       if (searchField && searchField !== "") {
+        console.log("items Found", itemsFound);
         return (
           itemsFound.toAccount
             .toLowerCase()
@@ -154,11 +158,11 @@ export const LogicTable = ({ data, search }) => {
           itemsFound.fromAccount
             .toLowerCase()
             .includes(searchField.toLowerCase()) ||
-          itemsFound.transactionDate.includes(searchField) ||
+          itemsFound.date.includes(searchField) ||
           itemsFound.transactionType
             .toLowerCase()
             .includes(searchField.toLowerCase()) ||
-          itemsFound.monthYear.includes(searchField.toUpperCase()) ||
+          itemsFound.monthYear.includes(searchField.charAt(0).toUpperCase()) ||
           itemsFound.amount === searchField ||
           itemsFound.notes.includes(searchField)
         );
@@ -185,13 +189,27 @@ export const LogicTable = ({ data, search }) => {
   const deleteID = (e) => {
     //console.log("delete id", );
     const delID = e.target.id;
+    const deleteData = getData.filter((data) => {
+      return data.id !== Number(delID);
+    });
+    //console.log("grouped by data", data);
+    // console.log({ data }, { deleteData });
 
-    const deleteIndex = data.find((deleteData) => {
-      return deleteData.id === Number(delID);
+    setData(deleteData);
+    setPropsData(getData);
+  };
+
+  useEffect(() => {
+    // let groupedObject = [...data];
+
+    // const resut = groupedObject;
+
+    const resut = data.map((dataArr) => {
+      return dataArr;
     });
 
-    console.log("data",data,"Delete Index",deleteIndex,"del ID",typeof delID);
-  };
+    //console.log("result", resut);
+  }, []);
 
   return (
     <div>
@@ -254,12 +272,12 @@ export const LogicTable = ({ data, search }) => {
                     {" "}
                     <Link to={"/makePayment"} state={keys.id}>
                       {" "}
-                      <i class="fas fa-edit"></i>{" "}
+                      <i className="fas fa-edit"></i>{" "}
                     </Link>{" "}
                   </td>
                   <td>
                     <i
-                      class="fa fa-trash"
+                      className="fa fa-trash"
                       aria-hidden="true"
                       id={keys.id}
                       onClick={deleteID}

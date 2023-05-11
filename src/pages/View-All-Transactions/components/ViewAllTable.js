@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { LogicTable } from "../LogicTable";
 import { useNavigate } from "react-router-dom";
 import { localStorage } from "../localstorage";
@@ -15,10 +15,13 @@ export const ViewAllTable = () => {
   // use data of context
   const { getData, setData } = useContext(GlobalData);
 
+  // console.log("get data in viewall table pages", getData);
+
   const storageData = localStorage;
 
   const [maindata, setMainData] = useState(getData);
   const [orderBy, setOrderBy] = useState([]);
+  const [globalKey, setGlobalKey] = useState("");
   const [groupByTitle, setGroupByTitle] = useState();
   const [searchData, setSearchData] = useState([
     {
@@ -28,8 +31,12 @@ export const ViewAllTable = () => {
 
   const handleGroupBy = (e) => {
     let finalData = [];
+
+    setGlobalKey(e.target.value);
+
     const selectedValue = e.target.value;
-    const result = maindata.reduce((a, b) => {
+
+    const result = getData.reduce((a, b) => {
       a[b[selectedValue]] = a[b[selectedValue]] || [];
       a[b[selectedValue]].push(b);
       return a;
@@ -37,11 +44,26 @@ export const ViewAllTable = () => {
     Object.keys(result).map((groupedData, index) => {
       finalData.push(result[groupedData]);
     });
-    //console.log("final data", finalData);
+
     setOrderBy(finalData);
   };
 
-  //console.log("order By", orderBy);
+  //call the useEffect when the data got deleted and the data have to reset in the group by data
+  useEffect(() => {
+    let finalData = [];
+
+    const result = getData.reduce((a, b) => {
+      a[b[globalKey]] = a[b[globalKey]] || [];
+      a[b[globalKey]].push(b);
+      return a;
+    }, {});
+
+    Object.keys(result).map((groupedData, index) => {
+      return finalData.push(result[groupedData]);
+    });
+
+    setOrderBy(finalData);
+  }, [getData]);
 
   // handle search function
   const handlerSearch = (val) => {
@@ -68,18 +90,24 @@ export const ViewAllTable = () => {
               }}
             >
               <div>
-                <button onClick={navigateToForm}>Make Payment</button>
+                <button
+                  className="btn btn-outline-dark"
+                  onClick={navigateToForm}
+                >
+                  Cash In
+                </button>
               </div>
               <div>
                 <input
                   type="text"
                   onChange={handlerSearch}
                   placeholder="search"
+                  className="form-control"
                 />
               </div>
 
               <div>
-                <select onChange={handleGroupBy}>
+                <select onChange={handleGroupBy} className="form-control">
                   <option value="" disabled selected hidden>
                     Select Group BY
                   </option>
@@ -112,7 +140,7 @@ export const ViewAllTable = () => {
           <LogicTable key={index} data={groupData} search={searchData} />
         ))
       ) : (
-        <LogicTable data={maindata} search={searchData} />
+        <LogicTable data={getData} search={searchData} />
       )}
 
       {/* <SingleTable data={maindata} />} /> */}
