@@ -3,6 +3,7 @@ import { PaymentForm } from "./pages/Transactions/components/PaymentForm";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ViewAllTable } from "./pages/View-All-Transactions/components/ViewAllTable";
 import { ProviderFunction } from "./context/FormData";
+import { HomePage } from "./pages/Home page/homePage";
 import { Fragment } from "react";
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
         <ProviderFunction>
           <Fragment>
             <Routes>
+            <Route path="/" element={<HomePage />} />
               <Route path="/makePayment" element={<PaymentForm />} />
               <Route path="/allTransaction" element={<ViewAllTable />} />
             </Routes>
